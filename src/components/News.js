@@ -1,34 +1,48 @@
 import React, { Component } from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner';
+import PropTypes from 'prop-types'
+
 
 let articles = []
 export default class News extends Component {
+  static defaultProps={
+    country:"in",
+    pageSize:8
+  }
+
+  static ProtoTypes={
+    country:PropTypes.string,
+    pageSize:PropTypes.number,
+    category:PropTypes.string,
+  }
+
   constructor(){
     super();
     this.state={
       articles:articles,
       page:1,
-      pageSize:20,
+      pageSize:10,
+      maxPage:2,
       loading:false,
     }
-  }
-  
+  }  
     componentDidMount = async (page)=>{
     this.setState({loading:true})
     console.log("current page=>",this.state.page);
-    const url = `https://newsapi.org/v2/everything?q=business&sortBy=popularity&apiKey=691e4ff22f7b4f5b8815ad7411d86bab&page=${page}&pageSize=${this.state.pageSize}`
+    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=691e4ff22f7b4f5b8815ad7411d86bab&page=${page}&pageSize=${this.state.pageSize}`
     let data = await fetch(url)
     data= await data.json();
+    this.setState({maxPage:data.totalResults/this.state.pageSize})
+    console.log(data);
     this.setState({articles:data.articles}) 
     this.setState({loading:false})
-
   }
 
   handleNextPage = ()=>{
-    const newPage = this.state.page<5?this.state.page+1:this.state.page
+    const newPage = this.state.page<this.state.maxPage?this.state.page+1:this.state.page
     this.setState({page:newPage})
-    console.log("current page next=> ",this.state.page)   
+    console.log("current page next=> ",this.state.page,"maxPage=>",this.state.maxPage)   
     this.componentDidMount(newPage);
   }
   
@@ -45,7 +59,7 @@ export default class News extends Component {
     <>  
       <div className="container d-flex justify-content-between">
               <button disabled={this.state.page<=1} type="button" class="btn btn-dark" onClick={this.handlePrevPage}>&larr; Prev</button>
-              <button disabled={this.state.page===5} type="button" class="btn btn-dark" onClick={this.handleNextPage}>Next &rarr;</button>
+              <button disabled={this.state.page===this.state.maxPage} type="button" class="btn btn-dark" onClick={this.handleNextPage}>Next &rarr;</button>
         </div>
       <h1 className='text-center'> HOT NEWS</h1>
       {this.state.loading && <div style={{textAlign:"center"}}><Spinner /></div>}
@@ -56,16 +70,15 @@ export default class News extends Component {
             return(
               <div key={element.url} className="p-2" style={{margin:"1rem",}}>
                 <div className="col-md-3 my-3" style={{margin:"1rem"}}>
-                    <NewsItem heading={(element.title).slice(0,30)} imageurl={element.urlToImage} text={element.description=element.description?element.description.slice(0,90):element.description} newsUrl={element.url} />
+                    <NewsItem heading={(element.title).slice(0,30)} imageurl={element.urlToImage} text={element.description=element.description?element.description.slice(0,90):element.description} newsUrl={element.url} publishDate={(element.publishedAt)} source={element.source.name}/>
                 </div>
               </div>
             )
           }
-          
         })}
         <div className="container d-flex justify-content-between">
               <button disabled={this.state.page<=1} type="button" class="btn btn-dark" onClick={this.handlePrevPage}>&larr; Prev</button>
-              <button disabled={this.state.page===5} type="button" class="btn btn-dark" onClick={this.handleNextPage}>Next &rarr;</button>
+              <button disabled={this.state.page===this.state.maxPage} type="button" class="btn btn-dark" onClick={this.handleNextPage}>Next &rarr;</button>
         </div>
       </div> 
     </>
