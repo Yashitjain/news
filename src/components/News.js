@@ -31,12 +31,14 @@ export default class News extends Component {
 
   updateNews = async()=>{
     this.setState({loading:true})
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=424e10faf7e344d6a1a7918fc4349bc0&page=${this.state.page}&pageSize=${this.state.pageSize}`
+    this.props.progress(30)
+    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=${this.state.pageSize}`
     let data = await fetch(url)
     data = await data.json();
-    this.setState({articles:data.articles,totalarticles:data.totalResults});
-    console.log("data=>",data)
-    this.setState({loading:false})
+    this.props.progress(70)
+    this.setState({articles:data.articles,totalarticles:data.totalResults,loading:false});
+    this.props.progress(100)
+
   }
 
   componentDidMount = ()=>{
@@ -47,7 +49,7 @@ export default class News extends Component {
     const newpage = this.state.page + 1
     this.setState({page:newpage})
     console.log(this.state.page)
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=424e10faf7e344d6a1a7918fc4349bc0&page=${newpage}&pageSize=${this.state.pageSize}`
+    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=${this.props.apiKey}&page=${newpage}&pageSize=${this.state.pageSize}`
     let data = await fetch(url)
     data = await data.json();
     setTimeout(() => {
@@ -66,7 +68,6 @@ export default class News extends Component {
           hasMore={this.state.articles.length<this.state.totalarticles}
           loader={<Spinner />}
       >
-
           <div className='d-flex flex-row mb-4 flex-wrap justify-content-md-evenly'>
             {!this.state.loading && this.state.articles.map((element)=>{
               if(this.state.loading) this.setState({loading:false})
@@ -81,11 +82,8 @@ export default class News extends Component {
               }
             })}
           </div> 
-          
         </InfiniteScroll>
-          
     </>
-
     )
   }
 }
