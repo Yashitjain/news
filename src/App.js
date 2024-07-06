@@ -7,15 +7,12 @@ import {
   Route, 
 } from "react-router-dom";
 
-// import LoadingBar from 'react-top-loading-bar'
 
-// API KEY::::691e4ff22f7b4f5b8815ad7411d86bab
 export default class App extends Component {
   apiKey=process.env.REACT_APP_API_KEY
 
   state = {
     progress:10,
-    // apiKey:"691e4ff22f7b4f5b8815ad7411d86bab",
 
   }
   setProgress = (value)=>{
@@ -26,16 +23,8 @@ export default class App extends Component {
     return (
       <div>
         <Router>
-          APIKEY={this.apiKey}
           {console.log("apikey=>",this.state.apiKey)}
           <Navbar></Navbar>
-
-          {/* <LoadingBar
-            color='#f11946'
-            progress={this.state.progress}
-            onLoaderFinished={this.setProgress(0)}
-          /> */}
-
           <Routes>
             <Route exact path="/business" element={     <News apiKey={this.apiKey} progress = {this.setProgress} key="business" country="in" category="business"></News>}></Route>
             <Route exact path="/entertainment" element={<News apiKey={this.apiKey} progress = {this.setProgress} key="entertainment" country="in" category="entertainment"></News>}></Route>
