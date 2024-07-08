@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState,useEffect } from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner';
 import PropTypes from 'prop-types'
@@ -6,71 +6,55 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 
 let articles = []
-export default class News extends Component {
-  static defaultProps={
-    country:"in",
-    pageSize:8
-  }
+const News = (props) => {
 
-  static ProtoTypes={
-    country:PropTypes.string,
-    pageSize:PropTypes.number,
-    category:PropTypes.string,
-  }
+  const [articles,setArticles] = useState([])
+  const [page,setPage] = useState(1)
+  const [pageSize,setPageSize] = useState(10)
+  const [loading,setLoading] = useState(false)
+  const [totalArticles,setTotalArticles] = useState(0)
 
-  constructor(){
-    super();
-    this.state={
-      articles:articles,
-      page:1,
-      pageSize:10,
-      loading:false,
-      totalarticles :0
-    }
-  }  
-
-  updateNews = async()=>{
-    this.setState({loading:true})
-    this.props.progress(30)
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=${this.props.apiKey}&page=${this.state.page}&pageSize=${this.state.pageSize}`
+  const updateNews = async()=>{
+    setLoading(true)
+    props.progress(30)
+    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&sortBy=popularity&apiKey=${props.apiKey}&page=${page}&pageSize=${pageSize}`
     let data = await fetch(url)
     data = await data.json();
-    this.props.progress(70)
-    this.setState({articles:data.articles,totalarticles:data.totalResults,loading:false});
-    this.props.progress(100)
+    props.progress(70)
+    setArticles(data.articles)
+    setTotalArticles(data.totalResults)
+    setLoading(false)
+    props.progress(100)
 
   }
 
-  componentDidMount = ()=>{
-    this.updateNews()
-  }
+  useEffect (()=>{
+    updateNews()
+  },[])
 
-  fetchMoreData = async () =>{
-    const newpage = this.state.page + 1
-    this.setState({page:newpage})
-    console.log(this.state.page)
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&sortBy=popularity&apiKey=${this.props.apiKey}&page=${newpage}&pageSize=${this.state.pageSize}`
+  const fetchMoreData = async () =>{
+    const newpage = page + 1
+    setPage(newpage)
+    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&sortBy=popularity&apiKey=${props.apiKey}&page=${newpage}&pageSize=${pageSize}`
     let data = await fetch(url)
     data = await data.json();
     setTimeout(() => {
-    this.setState({articles:(this.state.articles).concat(data.articles),totalarticles:data.totalResults});
+      setArticles(articles.concat(data.articles))
+      setTotalArticles(data.totalResults)
     }, 1500);
-    console.log("data.articles=>",data.articles)
   }
-
-  render() {
     return (
     <>  
       <h1 className='text-center'> HOT NEWS</h1>
       <InfiniteScroll
-          dataLength={this.state.articles.length}
-          next={this.fetchMoreData}
-          hasMore={this.state.articles.length<this.state.totalarticles}
+          dataLength={articles.length}
+          next={fetchMoreData}
+          hasMore={articles.length<totalArticles}
           loader={<Spinner />}
       >
           <div className='d-flex flex-row mb-4 flex-wrap justify-content-md-evenly'>
-            {!this.state.loading && this.state.articles.map((element)=>{
-              if(this.state.loading) this.setState({loading:false})
+            {!loading && articles.map((element)=>{
+              if(loading) setLoading(false)
               if(element && !element.title.includes("Removed") ){
                 return(
                   <div key={element.url} className="p-2" style={{margin:"1rem",}}>
@@ -86,4 +70,18 @@ export default class News extends Component {
     </>
     )
   }
+//eslint-disable-line
+
+News.defaultProps={
+  country:"in",
+  pageSize:8
 }
+//eslint-disable-line
+
+News.ProtoTypes={
+  country:PropTypes.string,
+  pageSize:PropTypes.number,
+  category:PropTypes.string,
+}
+
+export default News

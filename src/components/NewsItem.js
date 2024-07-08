@@ -1,12 +1,8 @@
 import React, { Component } from 'react'
 
-export default class NewsItem extends Component {
-  render(props) {
-  let {heading,imageurl,text,newsUrl,publishDate,source} = this.props
+const NewsItem = (props)=> {
+  let {heading,imageurl,text,newsUrl,publishDate,source} = props
   publishDate = new Date(publishDate).toLocaleString(undefined, {timeZone: 'Asia/Kolkata'});
-
-
-
     return (
       <div style={{border:"1px solid black",width:"18rem"}}>
         <div className="card" style={{}}>
@@ -23,4 +19,4 @@ export default class NewsItem extends Component {
       </div>
     )
   }
-}
+export default NewsItem
